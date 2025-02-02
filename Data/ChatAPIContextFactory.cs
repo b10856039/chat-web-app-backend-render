@@ -8,16 +8,29 @@ public class ChatAPIContextFactory : IDesignTimeDbContextFactory<ChatAPIContext>
 {
     public ChatAPIContext CreateDbContext(string[] args)
     {
-        // 設定資料庫連線
-        var configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json")
-            .Build();
+        // 讀取環境變數中的資料庫連線字串（在Render上通常會設置這些環境變數）
+        var connectionString = Environment.GetEnvironmentVariable("CHATSTORE_CONNECTION_STRING");
+
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            throw new InvalidOperationException("Connection string is not set in environment variables.");
+        }
 
         var optionsBuilder = new DbContextOptionsBuilder<ChatAPIContext>();
-        optionsBuilder.UseSqlite(configuration.GetConnectionString("ChatAPI"));
-
+        optionsBuilder.UseNpgsql(connectionString);
 
         return new ChatAPIContext(optionsBuilder.Options);
+
+        // 設定資料庫連線 (DEV)
+        // var configuration = new ConfigurationBuilder()
+        //     .SetBasePath(Directory.GetCurrentDirectory())
+        //     .AddJsonFile("appsettings.json")
+        //     .Build();
+
+        // var optionsBuilder = new DbContextOptionsBuilder<ChatAPIContext>();
+        // optionsBuilder.UseSqlite(configuration.GetConnectionString("ChatAPI"));
+
+
+        // return new ChatAPIContext(optionsBuilder.Options);
     }
 }

@@ -19,7 +19,14 @@ builder.Services.AddCors(options =>
 });
 
 // 設定資料庫連線字串
-var connstring = builder.Configuration.GetConnectionString("ChatStore");
+// var connstring = builder.Configuration.GetConnectionString("CHATSTORE_CONNECTION_STRING");
+// 從環境變數讀取資料庫連線字串
+var connstring = Environment.GetEnvironmentVariable("CHATSTORE_CONNECTION_STRING");
+Console.WriteLine("Connection string: " + connstring);
+if (string.IsNullOrEmpty(connstring))
+{
+    throw new InvalidOperationException("Connection string is not set in environment variables.");
+}
 
 
 // 註冊 Sqlite 資料庫服務 (DEV)

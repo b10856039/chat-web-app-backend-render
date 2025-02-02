@@ -19,3 +19,9 @@ appsettings.json
 appsettings.Development.json
 
 *.db
+
+*.env
+
+ChatRoom.http
+User.http
+Message.http
