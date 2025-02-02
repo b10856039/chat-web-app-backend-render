@@ -45,7 +45,7 @@ public static class SignalRHandler
         {
             var user = await _dbContext.Users.FindAsync(userId);
             var chatRoom = await _dbContext.ChatRooms.FindAsync(chatRoomId);
-            var datetime = ConvertToTaipeiTime(DateTime.UtcNow);
+            var datetime = DateTime.UtcNow;
 
 
             var userChatroom = await _dbContext.UserChatRooms.Where( ucr => ucr.UserId == userId && ucr.ChatRoomId == chatRoomId && ucr.IsBanned == false).FirstOrDefaultAsync();
@@ -107,12 +107,6 @@ public static class SignalRHandler
         }
 
         
-        private static DateTime ConvertToTaipeiTime(DateTime utcDateTime)
-        {
-            var taipeiTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Taipei Standard Time");
-            var taipeiTime = TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, taipeiTimeZone);
-            return taipeiTime.AddTicks(-(taipeiTime.Ticks % TimeSpan.TicksPerSecond));
-        }
     }
 }
 

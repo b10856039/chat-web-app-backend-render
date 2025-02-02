@@ -46,18 +46,8 @@ public static class UserMapping
             PhotoImg = user.PhotoImg != null ? Convert.FromBase64String(user.PhotoImg) : null ,
             Role = user.Role,
             UserChatRooms = new List<UserChatRoom>(),
-            UpdateAt = ConvertToTaipeiTime(DateTime.UtcNow),
+            UpdateAt = DateTime.UtcNow,
         };
-    }
-
-    private static DateTime ConvertToTaipeiTime(DateTime utcDateTime)
-    {
-        // 台北時區
-        var taipeiTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Taipei Standard Time");
-        // 轉換為台北時間
-        var taipeiTime = TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, taipeiTimeZone);
-        // 去掉毫秒部分
-        return taipeiTime.AddTicks(-(taipeiTime.Ticks % TimeSpan.TicksPerSecond));
     }
 
 }
