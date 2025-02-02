@@ -79,9 +79,9 @@ public class ChatAPIContext(DbContextOptions<ChatAPIContext> options) : DbContex
             .HasForeignKey(m => m.ChatRoomId) // 使用 ChatRoomId 作為外鍵
             .OnDelete(DeleteBehavior.Cascade); // 如果聊天室刪除，則刪除該聊天室的所有消息
 
-        modelBuilder.Entity<User>().HasData(
-            new User{ Id = 1, Username = "test1", Email = "test@gmail.com", Phone = "09813618", Password = "test1", State = UserState.Offline, PhotoImg = null, Role = UserRole.Member, CreateAt = new DateTime(2025, 01, 13, 14, 30, 15), UpdateAt = new DateTime(2025, 01, 13, 14, 30, 15), IsDeleted = false },
-            new User{ Id = 2, Username = "test2", Email = "test2@gmail.com", Phone = "09813717", Password = "test2", State = UserState.Offline, PhotoImg = null, Role = UserRole.Member, CreateAt = new DateTime(2025, 01, 13, 14, 30, 15), UpdateAt = new DateTime(2025, 01, 13, 14, 30, 15), IsDeleted = false }
-        );
+        // modelBuilder.Entity<User>().HasData(
+        //     new User{ Id = 1, Username = "test1", Email = "test@gmail.com", Phone = "09813618", Password = "test1", State = UserState.Offline, PhotoImg = null, Role = UserRole.Member, CreateAt = new DateTime(2025, 01, 13, 14, 30, 15), UpdateAt = new DateTime(2025, 01, 13, 14, 30, 15), IsDeleted = false },
+        //     new User{ Id = 2, Username = "test2", Email = "test2@gmail.com", Phone = "09813717", Password = "test2", State = UserState.Offline, PhotoImg = null, Role = UserRole.Member, CreateAt = new DateTime(2025, 01, 13, 14, 30, 15), UpdateAt = new DateTime(2025, 01, 13, 14, 30, 15), IsDeleted = false }
+        // );
     }
 }

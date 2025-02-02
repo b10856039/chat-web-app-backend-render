@@ -27,8 +27,8 @@ public class User
     public UserState State { get; set; } = UserState.Offline;
     public byte[]? PhotoImg { get; set; }
     public UserRole Role { get; set; } = UserRole.Member;
-    public DateTime CreateAt { get; set; } = ConvertToTaipeiTime(DateTime.UtcNow);
-    public DateTime UpdateAt { get; set; } = ConvertToTaipeiTime(DateTime.UtcNow);
+    public DateTime CreateAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdateAt { get; set; } = DateTime.UtcNow;
     public bool IsDeleted { get; set; } = false;
 
     // 确保正确初始化集合
@@ -37,15 +37,6 @@ public class User
     public ICollection<Friendship> FriendshipsInitiated { get; set; } = new List<Friendship>();
     public ICollection<Friendship> FriendshipsReceived { get; set; } = new List<Friendship>();
 
-    private static DateTime ConvertToTaipeiTime(DateTime utcDateTime)
-    {
-        // 台北時區
-        var taipeiTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Taipei Standard Time");
-        // 轉換為台北時間
-        var taipeiTime = TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, taipeiTimeZone);
-        // 去掉毫秒部分
-        return taipeiTime.AddTicks(-(taipeiTime.Ticks % TimeSpan.TicksPerSecond));
-    }
 }
 
 

@@ -16,18 +16,9 @@ public class Friendship
     public int RequesterId { get; set; }
     public int ReceiverId { get; set; }
     public FriendshipState Status { get; set; } = FriendshipState.Pending;
-    public DateTime CreatedAt { get; set; } = ConvertToTaipeiTime(DateTime.UtcNow);
-    public DateTime UpdatedAt { get; set; } = ConvertToTaipeiTime(DateTime.UtcNow);
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    private static DateTime ConvertToTaipeiTime(DateTime utcDateTime)
-    {
-        // 台北時區
-        var taipeiTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Taipei Standard Time");
-        // 轉換為台北時間
-        var taipeiTime = TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, taipeiTimeZone);
-        // 去掉毫秒部分
-        return taipeiTime.AddTicks(-(taipeiTime.Ticks % TimeSpan.TicksPerSecond));
-    }
 
     // 導覽屬性
     public User Requester { get; set; } = null!;
