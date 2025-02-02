@@ -1,0 +1,118 @@
+using System;
+using ChatAPI.Data;
+using ChatAPI.DTO.Message;
+using ChatAPI.Entities;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
+
+namespace ChatAPI.Extensions;
+
+public static class SignalRHandler
+{
+
+    public class ChatHub(ChatAPIContext dbContext) : Hub
+    {
+        private readonly ChatAPIContext _dbContext = dbContext;
+
+        // 當用戶連接時將其加入聊天室
+        public async Task JoinChatRoom(int chatRoomId)
+        {
+            // 把聊天室ID存儲在連接上下文中
+            Context.Items["ChatRoomId"] = chatRoomId;
+
+            // 將連接加入到聊天室群組
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"ChatRoom_{chatRoomId}");
+        }
+
+        //當用戶連接時加入所有聊天室
+        public async Task JoinAllChatRoom(int userId)
+        {
+            var allUserChatroom = await _dbContext.UserChatRooms.Where( uc => uc.UserId == userId && uc.IsActive && !uc.IsBanned).ToListAsync();
+
+            foreach(var room in allUserChatroom)
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, $"ChatRoom_{room.ChatRoomId}");
+            }
+        }
+
+        public async Task LeaveChatRoom(int chatRoomId)
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"ChatRoom_{chatRoomId}");
+            Context.Items.Remove("ChatRoomId"); // 可選：移除記錄
+        }
+
+        public async Task SendMessage(int chatRoomId, int userId, string messageContent)
+        {
+            var user = await _dbContext.Users.FindAsync(userId);
+            var chatRoom = await _dbContext.ChatRooms.FindAsync(chatRoomId);
+            var datetime = ConvertToTaipeiTime(DateTime.UtcNow);
+
+
+            var userChatroom = await _dbContext.UserChatRooms.Where( ucr => ucr.UserId == userId && ucr.ChatRoomId == chatRoomId && ucr.IsBanned == false).FirstOrDefaultAsync();
+
+            // 檢查是否找到對應的 User 和 ChatRoom
+            if (user == null || chatRoom == null)
+            {
+                // 向當前客戶端發送錯誤消息
+                await Clients.Caller.SendAsync("ReceiveError", "User or ChatRoom not found");
+                return;
+            }
+
+            if(userChatroom == null)
+            {
+                // 向當前客戶端發送錯誤消息
+                await Clients.Caller.SendAsync("ReceiveError", "User not in Chatroom or get banned");
+                return;
+            }
+
+            var message = new Message
+            {
+                Content = messageContent,
+                SentAt = datetime,
+                UserId = user.Id,
+                User = user, // 設置 User
+                ChatRoomId = chatRoomId,
+                ChatRoom = chatRoom // 設置 ChatRoom
+            };
+
+            _dbContext.Messages.Add(message);
+            await _dbContext.SaveChangesAsync();
+
+            await Clients.Group($"ChatRoom_{chatRoomId}").SendAsync("ReceiveMessage", 
+                new MessageDTO
+                (
+                    message.Id,
+                    message.Content,
+                    message.SentAt,
+                    user.Id,
+                    user.Username,
+                    user.PhotoImg != null ? Convert.ToBase64String(user.PhotoImg) : "",
+                    chatRoomId
+                ));
+
+        }
+
+        // 當用戶斷開連接時將其移出聊天室
+        public override async Task OnDisconnectedAsync(Exception? exception)
+        {
+            // 從 Context.Items 取出 chatRoomId
+            if (Context.Items.ContainsKey("ChatRoomId"))
+            {
+                var chatRoomId = (int)Context.Items["ChatRoomId"];
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"ChatRoom_{chatRoomId}");
+            }
+
+            // 執行基類的 OnDisconnectedAsync 方法
+            await base.OnDisconnectedAsync(exception);
+        }
+
+        
+        private static DateTime ConvertToTaipeiTime(DateTime utcDateTime)
+        {
+            var taipeiTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Taipei Standard Time");
+            var taipeiTime = TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, taipeiTimeZone);
+            return taipeiTime.AddTicks(-(taipeiTime.Ticks % TimeSpan.TicksPerSecond));
+        }
+    }
+}
+

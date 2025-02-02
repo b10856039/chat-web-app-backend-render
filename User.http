@@ -1,0 +1,53 @@
+
+GET http://localhost:5266/api/user
+
+
+GET http://localhost:5266/api/user?query=test@gmail.com
+
+
+GET http://localhost:5266/api/user/1
+GET http://localhost:5266/api/user/test1
+
+POST http://localhost:5266/api/user
+Content-Type: application/json
+
+{
+    "Username":"test1777",
+    "Email":"test12673@gmail.com",
+    "Phone":"95201558",
+    "Password":"goxx53761"
+}
+
+PUT http://localhost:5266/api/user/1
+Content-Type: application/json
+
+{
+    "Username":"Poiu1238",
+    "Email":"test@gmail.com",
+    "Phone":"95201558",
+    "Password":"goxx11",
+    "State":1,
+    "PhotoImg":"xx/hw.png",
+    "Role":1
+}
+
+PATCH  http://localhost:5266/api/user/1
+Content-Type: application/json
+
+{
+    "State":0
+}
+
+
+
+DELETE  http://localhost:5266/api/user/1
+
+
+
+POST  http://localhost:5266/api/auth/login
+Content-Type: application/json
+
+{
+    "InputString":"09813618",
+    "Password":"test1"
+}

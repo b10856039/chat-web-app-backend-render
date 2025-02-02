@@ -1,0 +1,26 @@
+# 🔹 1. 不要 Push bin、obj、out 等編譯後的文件
+bin/
+obj/
+out/
+*.exe
+*.dll
+*.pdb
+
+# 🔹 3. .NET Core 專案設定
+.vscode/
+*.user
+*.suo
+*.cache
+*.csproj.user
+*.db
+
+# 🔹 4. 環境變數 & 設定檔
+appsettings.json
+appsettings.Development.json
+
+# 🔹 5. Docker 相關
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+*.db

@@ -1,0 +1,1 @@
+GET http://localhost:5266/api/message?userId=1&chatroomId=1

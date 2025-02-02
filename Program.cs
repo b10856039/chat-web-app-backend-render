@@ -1,0 +1,64 @@
+using ChatAPI.Data;
+using static ChatAPI.Extensions.SignalRHandler;
+
+using Npgsql;
+using Microsoft.EntityFrameworkCore;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// 添加 CORS 服務
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalhost", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")  // 設定允許的來源
+              .AllowAnyHeader()                   // 允許所有標頭
+              .AllowAnyMethod()                   // 允許所有方法
+              .AllowCredentials();       
+    });
+});
+
+// 設定資料庫連線字串
+var connstring = builder.Configuration.GetConnectionString("ChatStore");
+
+
+// 註冊 Sqlite 資料庫服務 (DEV)
+// builder.Services.AddSqlite<ChatAPIContext>(connstring);
+
+
+// 註冊 PostgreSQL 資料庫服務
+builder.Services.AddDbContext<ChatAPIContext>(options =>
+    options.UseNpgsql(connstring)
+);
+
+// 註冊 MVC 服務，包括控制器
+builder.Services.AddControllers();
+
+// 註冊 SignalR 服務
+builder.Services.AddSignalR();
+
+var app = builder.Build();
+
+// 設定路由
+app.UseRouting();  // 確保 SignalR 和控制器都能正確處理請求
+
+// 設置 CORS 策略
+// 在 UseRouting 之前設置 CORS 策略
+app.UseCors("AllowLocalhost");  
+
+// 設置 SignalR Hub 路由
+app.MapHub<ChatHub>("/chatHub");
+
+// 使用 MVC 路由
+app.MapControllers();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+// 如果有需要，可以在此執行資料庫遷移
+await app.MigrateDBAsync();
+
+// 啟動應用
+app.Run();
+
+
