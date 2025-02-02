@@ -104,9 +104,14 @@ namespace ChatAPI.Controllers
             if (!string.IsNullOrEmpty(updateUser.Phone)) targetUser.Phone = updateUser.Phone;
             if (updateUser.State.HasValue) targetUser.State = updateUser.State.Value;
 
-            if(!string.IsNullOrEmpty(updateUser.NewPassword) && !string.IsNullOrEmpty(updateUser.OldPassword) && updateUser.OldPassword == updateUser.NewPassword)
+            if(!string.IsNullOrEmpty(updateUser.NewPassword) && !string.IsNullOrEmpty(updateUser.OldPassword))
             {
-                targetUser.Password = updateUser.NewPassword;
+                if(updateUser.OldPassword == targetUser.Password){
+                    targetUser.Password = updateUser.NewPassword;
+                }else{
+                    return Unauthorized("密碼不正確");
+                }
+
             }
 
             // 處理圖片 Base64 字串，去除前綴
