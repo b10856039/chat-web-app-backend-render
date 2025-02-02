@@ -18,9 +18,4 @@ out/
 appsettings.json
 appsettings.Development.json
 
-# 🔹 5. Docker 相關
-Dockerfile
-docker-compose.yml
-.dockerignore
-
 *.db
