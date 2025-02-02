@@ -11,7 +11,8 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalhost", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")  // 設定允許的來源
+        policy.WithOrigins("http://localhost:5173",
+                            "https://chat-web-app-vercel.vercel.app")  // 設定允許的來源
               .AllowAnyHeader()                   // 允許所有標頭
               .AllowAnyMethod()                   // 允許所有方法
               .AllowCredentials();       
