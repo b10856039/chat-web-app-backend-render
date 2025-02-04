@@ -58,7 +58,7 @@ app.UseRouting();  // 確保 SignalR 和控制器都能正確處理請求
 app.UseCors("AllowLocalhost");  
 
 // 設置 SignalR Hub 路由
-app.MapHub<ChatHub>("/chatHub");
+app.MapHub<ChatHub>("/api/chatHub");
 
 // 使用 MVC 路由
 app.MapControllers();
