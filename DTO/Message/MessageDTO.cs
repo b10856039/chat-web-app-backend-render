@@ -4,9 +4,11 @@ public record class MessageDTO
 (
     int Id,
     string Content, 
-    DateTime SentAt, 
     int SenderId, 
     string SenderName,
     string SenderPhotoImg,
-    int ChatRoomId 
+    int ChatRoomId,
+    DateTime SentAt, 
+    DateTime UpdateAt,
+    bool IsDeleted
 );

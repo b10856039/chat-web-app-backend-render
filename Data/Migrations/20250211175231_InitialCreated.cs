@@ -19,6 +19,7 @@ namespace ChatAPI.Data.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Username = table.Column<string>(type: "text", nullable: false),
+                    ShowUsername = table.Column<string>(type: "text", nullable: false),
                     Email = table.Column<string>(type: "text", nullable: false),
                     Phone = table.Column<string>(type: "text", nullable: false),
                     Password = table.Column<string>(type: "text", nullable: false),
@@ -35,31 +36,6 @@ namespace ChatAPI.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ChatRooms",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Roomname = table.Column<string>(type: "text", nullable: true),
-                    CreatedByUserId = table.Column<int>(type: "integer", nullable: false),
-                    RoomType = table.Column<int>(type: "integer", nullable: false),
-                    FriendshipForeignKey = table.Column<int>(type: "integer", nullable: true),
-                    CreateAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdateAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ChatRooms", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ChatRooms_Users_CreatedByUserId",
-                        column: x => x.CreatedByUserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Friendships",
                 columns: table => new
                 {
@@ -70,16 +46,11 @@ namespace ChatAPI.Data.Migrations
                     Status = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    PrivateChatroomId = table.Column<int>(type: "integer", nullable: true)
+                    PrivateChatRoomId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Friendships", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Friendships_ChatRooms_PrivateChatroomId",
-                        column: x => x.PrivateChatroomId,
-                        principalTable: "ChatRooms",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Friendships_Users_ReceiverId",
                         column: x => x.ReceiverId,
@@ -95,15 +66,49 @@ namespace ChatAPI.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ChatRooms",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Roomname = table.Column<string>(type: "text", nullable: true),
+                    PhotoImg = table.Column<byte[]>(type: "bytea", nullable: true),
+                    CreatedByUserId = table.Column<int>(type: "integer", nullable: false),
+                    RoomType = table.Column<int>(type: "integer", nullable: false),
+                    FriendshipId = table.Column<int>(type: "integer", nullable: true),
+                    CreateAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdateAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChatRooms", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ChatRooms_Friendships_FriendshipId",
+                        column: x => x.FriendshipId,
+                        principalTable: "Friendships",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_ChatRooms_Users_CreatedByUserId",
+                        column: x => x.CreatedByUserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Messages",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Content = table.Column<string>(type: "text", nullable: false),
-                    SentAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UserId = table.Column<int>(type: "integer", nullable: false),
-                    ChatRoomId = table.Column<int>(type: "integer", nullable: false)
+                    ChatRoomId = table.Column<int>(type: "integer", nullable: false),
+                    SentAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdateAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -113,7 +118,7 @@ namespace ChatAPI.Data.Migrations
                         column: x => x.ChatRoomId,
                         principalTable: "ChatRooms",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_Messages_Users_UserId",
                         column: x => x.UserId,
@@ -156,14 +161,10 @@ namespace ChatAPI.Data.Migrations
                 column: "CreatedByUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ChatRooms_FriendshipForeignKey",
+                name: "IX_ChatRooms_FriendshipId",
                 table: "ChatRooms",
-                column: "FriendshipForeignKey");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Friendships_PrivateChatroomId",
-                table: "Friendships",
-                column: "PrivateChatroomId");
+                column: "FriendshipId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Friendships_ReceiverId",
@@ -191,22 +192,16 @@ namespace ChatAPI.Data.Migrations
                 table: "UserChatRooms",
                 column: "ChatRoomId");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_ChatRooms_Friendships_FriendshipForeignKey",
-                table: "ChatRooms",
-                column: "FriendshipForeignKey",
-                principalTable: "Friendships",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.SetNull);
+            migrationBuilder.CreateIndex(
+                name: "IX_UserChatRooms_UserId_ChatRoomId",
+                table: "UserChatRooms",
+                columns: new[] { "UserId", "ChatRoomId" },
+                unique: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_ChatRooms_Friendships_FriendshipForeignKey",
-                table: "ChatRooms");
-
             migrationBuilder.DropTable(
                 name: "Messages");
 
@@ -214,10 +209,10 @@ namespace ChatAPI.Data.Migrations
                 name: "UserChatRooms");
 
             migrationBuilder.DropTable(
-                name: "Friendships");
+                name: "ChatRooms");
 
             migrationBuilder.DropTable(
-                name: "ChatRooms");
+                name: "Friendships");
 
             migrationBuilder.DropTable(
                 name: "Users");

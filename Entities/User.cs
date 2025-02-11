@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ChatAPI.Entities;
 
@@ -21,10 +22,11 @@ public class User
 {
     public int Id { get; set; }
     public string Username { get; set; } = null!;
+    public string ShowUsername { get; set; } = null!;
     public string Email { get; set; } = null!;
     public string Phone { get; set; } = null!;
     public string Password { get; set; } = null!;
-    public UserState State { get; set; } = UserState.Offline;
+    public UserState State { get; set; } = UserState.Offline; 
     public byte[]? PhotoImg { get; set; }
     public UserRole Role { get; set; } = UserRole.Member;
     public DateTime CreateAt { get; set; } = DateTime.UtcNow;
@@ -36,6 +38,16 @@ public class User
     public ICollection<Message> Messages { get; set; } = new List<Message>();
     public ICollection<Friendship> FriendshipsInitiated { get; set; } = new List<Friendship>();
     public ICollection<Friendship> FriendshipsReceived { get; set; } = new List<Friendship>();
+
+    // 查詢好友
+    [NotMapped]
+    public IEnumerable<User> Friends => 
+        FriendshipsInitiated
+            .Where(f => f.Status == FriendshipState.Accepted)
+            .Select(f => f.Receiver)
+        .Concat(FriendshipsReceived
+            .Where(f => f.Status == FriendshipState.Accepted)
+            .Select(f => f.Requester));
 
 }
 

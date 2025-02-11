@@ -23,6 +23,9 @@ public class ChatAPIContext(DbContextOptions<ChatAPIContext> options) : DbContex
             .HasKey(uc => new { uc.UserId, uc.ChatRoomId });
 
         modelBuilder.Entity<UserChatRoom>()
+            .HasIndex(uc => new { uc.UserId, uc.ChatRoomId });
+
+        modelBuilder.Entity<UserChatRoom>()
             .HasOne(uc => uc.User)
             .WithMany(u => u.UserChatRooms)
             .HasForeignKey(uc => uc.UserId);
@@ -60,8 +63,8 @@ public class ChatAPIContext(DbContextOptions<ChatAPIContext> options) : DbContex
         // ChatRoom 和 Friendship 外鍵設置
         modelBuilder.Entity<ChatRoom>()
             .HasOne(cr => cr.Friendship)
-            .WithMany() // Friendship 不需要反向關聯
-            .HasForeignKey(cr => cr.FriendshipForeignKey)  // 明確指定外鍵
+            .WithOne(f => f.PrivateChatroom) // 確保雙向關聯
+            .HasForeignKey<ChatRoom>(cr => cr.FriendshipId)  // 明確指定外鍵
             .OnDelete(DeleteBehavior.SetNull); // 防止 Friendship 被刪除時設置 FriendshipId 為 null
             
         modelBuilder.Entity<Message>()
@@ -77,11 +80,8 @@ public class ChatAPIContext(DbContextOptions<ChatAPIContext> options) : DbContex
             .HasOne(m => m.ChatRoom) // 每條消息屬於一個聊天室
             .WithMany(c => c.Messages) // 聊天室有多條消息
             .HasForeignKey(m => m.ChatRoomId) // 使用 ChatRoomId 作為外鍵
-            .OnDelete(DeleteBehavior.Cascade); // 如果聊天室刪除，則刪除該聊天室的所有消息
+            .OnDelete(DeleteBehavior.SetNull); // 如果聊天室刪除，則刪除該聊天室的所有消息
 
-        // modelBuilder.Entity<User>().HasData(
-        //     new User{ Id = 1, Username = "test1", Email = "test@gmail.com", Phone = "09813618", Password = "test1", State = UserState.Offline, PhotoImg = null, Role = UserRole.Member, CreateAt = new DateTime(2025, 01, 13, 14, 30, 15), UpdateAt = new DateTime(2025, 01, 13, 14, 30, 15), IsDeleted = false },
-        //     new User{ Id = 2, Username = "test2", Email = "test2@gmail.com", Phone = "09813717", Password = "test2", State = UserState.Offline, PhotoImg = null, Role = UserRole.Member, CreateAt = new DateTime(2025, 01, 13, 14, 30, 15), UpdateAt = new DateTime(2025, 01, 13, 14, 30, 15), IsDeleted = false }
-        // );
+
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ChatAPI.Entities;
 
@@ -6,8 +7,7 @@ public enum FriendshipState
 {
     Pending = 0,
     Accepted = 1,
-    Rejected = 2,
-    Blocked = 3
+    Rejected = 2
 }
 
 public class Friendship
@@ -23,5 +23,7 @@ public class Friendship
     // 導覽屬性
     public User Requester { get; set; } = null!;
     public User Receiver { get; set; } = null!;
+
+    public int? PrivateChatRoomId { get; set; }
     public ChatRoom? PrivateChatroom { get; set; }
 }

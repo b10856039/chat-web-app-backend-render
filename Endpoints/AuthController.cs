@@ -1,18 +1,21 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using ChatAPI.Data;
 using ChatAPI.DTO;
 using ChatAPI.DTO.User;
 using ChatAPI.Entities;
+using ChatAPI.Mapping;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using static ChatAPI.Extensions.ExceptionMiddleware;
 
 namespace ChatAPI.Endpoints
 {
     [Route("api/[controller]")]
-    [ApiController]
     public class AuthController : ControllerBase
     {
 
@@ -23,75 +26,91 @@ namespace ChatAPI.Endpoints
             _dbContext = dbContext;
         }
 
+        //註冊
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] CreateUserDTO newUser)
+        {
 
-        // [HttpPost("register")]
-        // public async Task<IActionResult> Register([FromBody] UserDTO dto)
-        // {
-        //     if (_dbContext.Users.Any(u => u.Username == dto.Username))
-        //         return BadRequest("Username already exists.");
+            if (!ModelState.IsValid)
+            {
+                // 如果 ModelState 失敗，將錯誤進行包裝
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                                .Select(e => e.ErrorMessage)
+                                                .ToList();
 
-        //     using var hmac = new HMACSHA256();
-        //     var user = new User
-        //     {
-        //         Username = dto.Username,
-        //         PasswordHash = Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(dto.Password)))
-        //     };
+                return BadRequest(new ApiResponse<string>(errors));
+            }
 
-        //     _dbContext.Users.Add(user);
-        //     await _dbContext.SaveChangesAsync();
+            if (_dbContext.Users.Any(u => u.Username == newUser.Username || u.Email == newUser.Email || u.Phone == newUser.Phone))
+            {
+                return BadRequest( new ApiResponse<string>(new List<string> { "使用者名稱、信箱或手機已被使用" }) );
+            }
 
-        //     return Ok("User registered successfully.");
-        // }
+            var user = newUser.ToEntity();
+            
+            // 使用 PasswordHasher 來 Hash 密碼
+            var passwordHasher = new PasswordHasher<User>();
+            user.Password = passwordHasher.HashPassword(user, newUser.Password); // 自動加 Salt 並多次 Hash
 
+            _dbContext.Users.Add(user);
+
+            try
+            {
+                await _dbContext.SaveChangesAsync();
+                return Ok( new ApiResponse<string>("註冊成功!") );
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new ApiResponse<string>(new List<string> { "伺服器發生錯誤，請稍後再試" }));
+            }
+        }
+
+        //登入
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginAuthUserDTO dto)
         {
             var user = _dbContext.Users.FirstOrDefault(u => u.Email == dto.InputString || u.Phone == dto.InputString);
             if (user == null)
-                return Unauthorized("Invalid username or password.");
+                return Unauthorized( new ApiResponse<string>(new List<string> { "信箱或手機不存在" }) );
 
-            // using var hmac = new HMACSHA256();
-            // var computedHash = Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(dto.Password)));
+            var passwordHasher = new PasswordHasher<User>();
+            
+            // 驗證密碼
+            var result = passwordHasher.VerifyHashedPassword(user, user.Password, dto.Password);
 
-            // if (computedHash != user.PasswordHash)
-            //     return Unauthorized("Invalid username or password.");
+            if (result == PasswordVerificationResult.Failed)
+                return Unauthorized( new ApiResponse<string>(new List<string> { "(信箱/手機)或密碼不正確" }) );
 
-            if (dto.Password != user.Password)
-                return Unauthorized("Invalid username or password.");
+            var token = new LoginResponseDTO {
+                Token = GenerateJwtToken(user)
+            };
 
-
-            var token = GenerateJwtToken(user);
-            return Ok(new { Token = token });
+            return Ok( new ApiResponse<LoginResponseDTO>(token) );
         }
 
         public static string GenerateJwtToken(User user)
         {
-            // 定义密钥和加密算法
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("s3cr3t_k3y_!@#_$tr0ng_AND_R@nd0m")); // 替换为更安全的密钥
+            // 定義密鑰和加密算法
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("s3cr3t_k3y_!@#_$tr0ng_AND_R@nd0m")); // 替換為更安全的密鑰
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            // 定义JWT的声明（claims）
+            // 定義JWT（claims）
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Username), // 用户名
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // Token ID
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // 用户ID
-                new Claim(ClaimTypes.Role,((int)user.Role).ToString()), // 权限信息
-                new Claim(ClaimTypes.Email,user.Email),
-                new Claim("Phone",user.Phone),
-                new Claim("State",user.State.ToString())
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // 使用者ID
             };
 
-            // 创建Token对象
+            // 創建Token對象
             var token = new JwtSecurityToken(
-                issuer: "http://localhost:5266",         // 发布者
-                audience: "http://localhost:5266",       // 接收者
-                claims: claims,                   // 声明
+                issuer: "https://chat-web-app-vercel.vercel.app",         // 發布者
+                audience: "https://chat-web-app-vercel.vercel.app",       // 接收者
+                claims: claims,                   // 聲明
                 expires: DateTime.UtcNow.AddHours(1), // Token有效期
-                signingCredentials: credentials   // 签名凭证
+                signingCredentials: credentials   // 簽名憑證
             );
 
-            // 生成并返回JWT
+            // 生成並返回JWT
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }

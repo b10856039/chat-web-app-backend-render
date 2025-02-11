@@ -8,7 +8,8 @@ public class ChatAPIContextFactory : IDesignTimeDbContextFactory<ChatAPIContext>
 {
     public ChatAPIContext CreateDbContext(string[] args)
     {
-        // DotNetEnv.Env.Load();
+        // 設定資料庫連線PostgreSQL (DEV)
+        DotNetEnv.Env.Load();
         // 讀取環境變數中的資料庫連線字串（在Render上通常會設置這些環境變數）
         var connectionString = Environment.GetEnvironmentVariable("CHATSTORE_CONNECTION_STRING");
 
@@ -22,7 +23,7 @@ public class ChatAPIContextFactory : IDesignTimeDbContextFactory<ChatAPIContext>
 
         return new ChatAPIContext(optionsBuilder.Options);
 
-        // 設定資料庫連線 (DEV)
+        // 設定資料庫連線Sqlite (DEV)
         // var configuration = new ConfigurationBuilder()
         //     .SetBasePath(Directory.GetCurrentDirectory())
         //     .AddJsonFile("appsettings.json")

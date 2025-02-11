@@ -11,11 +11,13 @@ public static class MessageMapping
         return new(
             message.Id,
             message.Content,
-            message.SentAt,
             message.UserId,
             message.User!.Username,
             message.User.PhotoImg != null ? Convert.ToBase64String(message.User.PhotoImg) : "",
-            message.ChatRoomId
+            message.ChatRoomId,
+            message.SentAt,
+            message.UpdateAt,
+            message.IsDeleted
         );
     }
 }

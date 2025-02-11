@@ -72,7 +72,9 @@ public static class SignalRHandler
                 UserId = user.Id,
                 User = user, // 設置 User
                 ChatRoomId = chatRoomId,
-                ChatRoom = chatRoom // 設置 ChatRoom
+                ChatRoom = chatRoom, // 設置 ChatRoom
+                UpdateAt = datetime,
+                IsDeleted = false
             };
 
             _dbContext.Messages.Add(message);
@@ -83,11 +85,13 @@ public static class SignalRHandler
                 (
                     message.Id,
                     message.Content,
-                    message.SentAt,
                     user.Id,
                     user.Username,
                     user.PhotoImg != null ? Convert.ToBase64String(user.PhotoImg) : "",
-                    chatRoomId
+                    chatRoomId,
+                    message.SentAt,
+                    message.UpdateAt,
+                    message.IsDeleted
                 ));
 
         }
@@ -96,9 +100,9 @@ public static class SignalRHandler
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             // 從 Context.Items 取出 chatRoomId
-            if (Context.Items.ContainsKey("ChatRoomId"))
+            if (Context.Items.ContainsKey("ChatRoomId") && Context.Items["ChatRoomId"] is int chatRoomId)
             {
-                var chatRoomId = (int)Context.Items["ChatRoomId"];
+                // 若 chatRoomId 存在且是有效的 int 類型，則移出群組
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"ChatRoom_{chatRoomId}");
             }
 

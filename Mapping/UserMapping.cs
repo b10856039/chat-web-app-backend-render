@@ -12,6 +12,7 @@ public static class UserMapping
         return new(
             user.Id,
             user.Username,
+            user.ShowUsername,
             user.Email,
             user.Phone,
             user.State,
@@ -27,6 +28,7 @@ public static class UserMapping
     {
         return new User(){
             Username = user.Username,
+            ShowUsername = user.ShowUsername,
             Email = user.Email,
             Phone = user.Phone,
             Password = user.Password,
@@ -39,6 +41,7 @@ public static class UserMapping
         return new User(){
             Id = id,
             Username = user.Username,
+            ShowUsername = user.ShowUsername,
             Email = user.Email,
             Phone = user.Phone,
             Password = user.Password,

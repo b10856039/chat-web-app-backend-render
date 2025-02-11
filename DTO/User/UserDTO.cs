@@ -7,6 +7,7 @@ public record class UserDTO
 (
     int Id,
     string Username, 
+    string ShowUsername,
     string Email, 
     string Phone,
     UserState State, 

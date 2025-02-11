@@ -36,11 +36,14 @@ namespace ChatAPI.Data.Migrations
                     b.Property<int>("CreatedByUserId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("FriendshipForeignKey")
+                    b.Property<int?>("FriendshipId")
                         .HasColumnType("integer");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
+
+                    b.Property<byte[]>("PhotoImg")
+                        .HasColumnType("bytea");
 
                     b.Property<int>("RoomType")
                         .HasColumnType("integer");
@@ -55,7 +58,8 @@ namespace ChatAPI.Data.Migrations
 
                     b.HasIndex("CreatedByUserId");
 
-                    b.HasIndex("FriendshipForeignKey");
+                    b.HasIndex("FriendshipId")
+                        .IsUnique();
 
                     b.ToTable("ChatRooms");
                 });
@@ -71,7 +75,7 @@ namespace ChatAPI.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("PrivateChatroomId")
+                    b.Property<int?>("PrivateChatRoomId")
                         .HasColumnType("integer");
 
                     b.Property<int>("ReceiverId")
@@ -87,8 +91,6 @@ namespace ChatAPI.Data.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PrivateChatroomId");
 
                     b.HasIndex("ReceiverId");
 
@@ -113,7 +115,13 @@ namespace ChatAPI.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime>("SentAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("UpdateAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("UserId")
@@ -160,6 +168,10 @@ namespace ChatAPI.Data.Migrations
                     b.Property<int>("Role")
                         .HasColumnType("integer");
 
+                    b.Property<string>("ShowUsername")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int>("State")
                         .HasColumnType("integer");
 
@@ -199,6 +211,9 @@ namespace ChatAPI.Data.Migrations
 
                     b.HasIndex("ChatRoomId");
 
+                    b.HasIndex("UserId", "ChatRoomId")
+                        .IsUnique();
+
                     b.ToTable("UserChatRooms");
                 });
 
@@ -211,8 +226,8 @@ namespace ChatAPI.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("ChatAPI.Entities.Friendship", "Friendship")
-                        .WithMany()
-                        .HasForeignKey("FriendshipForeignKey")
+                        .WithOne("PrivateChatroom")
+                        .HasForeignKey("ChatAPI.Entities.ChatRoom", "FriendshipId")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("CreatedBy");
@@ -222,10 +237,6 @@ namespace ChatAPI.Data.Migrations
 
             modelBuilder.Entity("ChatAPI.Entities.Friendship", b =>
                 {
-                    b.HasOne("ChatAPI.Entities.ChatRoom", "PrivateChatroom")
-                        .WithMany()
-                        .HasForeignKey("PrivateChatroomId");
-
                     b.HasOne("ChatAPI.Entities.User", "Receiver")
                         .WithMany("FriendshipsReceived")
                         .HasForeignKey("ReceiverId")
@@ -238,8 +249,6 @@ namespace ChatAPI.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("PrivateChatroom");
-
                     b.Navigation("Receiver");
 
                     b.Navigation("Requester");
@@ -250,7 +259,7 @@ namespace ChatAPI.Data.Migrations
                     b.HasOne("ChatAPI.Entities.ChatRoom", "ChatRoom")
                         .WithMany("Messages")
                         .HasForeignKey("ChatRoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.SetNull)
                         .IsRequired();
 
                     b.HasOne("ChatAPI.Entities.User", "User")
@@ -288,6 +297,11 @@ namespace ChatAPI.Data.Migrations
                     b.Navigation("Messages");
 
                     b.Navigation("UserChatRooms");
+                });
+
+            modelBuilder.Entity("ChatAPI.Entities.Friendship", b =>
+                {
+                    b.Navigation("PrivateChatroom");
                 });
 
             modelBuilder.Entity("ChatAPI.Entities.User", b =>

@@ -6,12 +6,12 @@ using ChatAPI.Mapping;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using static ChatAPI.Extensions.ExceptionMiddleware;
 using static ChatAPI.Extensions.SignalRHandler;
 
 namespace ChatAPI.Endpoints
 {
     [Route("api/[controller]")]
-    [ApiController]
     public class MessageController : ControllerBase
     {
         private readonly IHubContext<ChatHub> _hubContext;
@@ -26,13 +26,27 @@ namespace ChatAPI.Endpoints
         [HttpGet]
         public async Task<IActionResult> GetHistoryMessages([FromQuery] int userId, [FromQuery] int chatroomId, [FromQuery] bool latestOne)
         {
+
+            var user = await _dbContext.Users.Where( u => u.Id == userId).FirstOrDefaultAsync();
+
+            if(user is null){
+                return NotFound( new ApiResponse<string>(new List<string> { "使用者不存在" }) );
+            }
+
+            var room = await _dbContext.ChatRooms.Where( r => r.Id == chatroomId).FirstOrDefaultAsync();
+
+            if(room is null)
+            {
+                return NotFound( new ApiResponse<string>(new List<string> { "聊天室不存在" }) );
+            }
+
             UserChatRoom? userChatroom = await _dbContext.UserChatRooms
                                 .Where( ucr => ucr.UserId == userId && ucr.ChatRoomId == chatroomId)
                                 .FirstOrDefaultAsync();
                                 
             if(userChatroom is null || userChatroom.IsBanned is true)
             {
-                return NotFound();
+                return NotFound( new ApiResponse<string>(new List<string> { "用戶不在聊天室，無法取得訊息" }) );
             }
 
             List<MessageDTO>? messages = [];
@@ -56,7 +70,7 @@ namespace ChatAPI.Endpoints
                                 .ToListAsync();
             }
 
-            return Ok(messages);
+            return Ok(new ApiResponse<List<MessageDTO>>(messages) );
         }
 
     }
