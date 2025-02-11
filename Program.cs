@@ -23,19 +23,20 @@ builder.Services.AddCors(options =>
 });
 
 
-// online version
-var connstring = builder.Configuration.GetConnectionString("CHATSTORE_CONNECTION_STRING");
-Console.WriteLine("Connection string: " + connstring);
-
 // 設定資料庫連線字串 (PostgreSQL DEV)
 // 從環境變數讀取資料庫連線字串
 // DotNetEnv.Env.Load();
-// var connstring = Environment.GetEnvironmentVariable("CHATSTORE_CONNECTION_STRING");
+// var connstring = builder.Configuration.GetConnectionString("CHATSTORE_CONNECTION_STRING");
 // Console.WriteLine("Connection string: " + connstring);
-// if (string.IsNullOrEmpty(connstring))
-// {
-//     throw new InvalidOperationException("Connection string is not set in environment variables.");
-// }
+
+// online version
+var connstring = Environment.GetEnvironmentVariable("CHATSTORE_CONNECTION_STRING");
+
+Console.WriteLine("Connection string: " + connstring);
+if (string.IsNullOrEmpty(connstring))
+{
+    throw new InvalidOperationException("Connection string is not set in environment variables.");
+}
 
 // var connstring = builder.Configuration.GetConnectionString("ChatStore");
 
