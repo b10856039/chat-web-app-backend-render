@@ -25,7 +25,7 @@ builder.Services.AddCors(options =>
 
 // online version
 var connstring = builder.Configuration.GetConnectionString("CHATSTORE_CONNECTION_STRING");
-
+Console.WriteLine("Connection string: " + connstring);
 
 // 設定資料庫連線字串 (PostgreSQL DEV)
 // 從環境變數讀取資料庫連線字串
