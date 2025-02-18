@@ -124,7 +124,7 @@ API的請求都需使用以下的基本URL:
 ---
 
 ### **DTO 說明**
-以下 DTO 定義了請求時所需的資料格式。
+以下 DTO 定義了請求時所需的資料格式，可前往/DTO查看。
 
 1. `CreateUserDTO` - 用於註冊新使用者
 2. `LoginAuthUserDTO` - 用於登入
