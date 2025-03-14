@@ -1,11 +1,16 @@
 using ChatAPI.Data;
 using static ChatAPI.Extensions.SignalRHandler;
-
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Npgsql;
 using Microsoft.EntityFrameworkCore;
 using ChatAPI.Extensions;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+
 
 // 添加 CORS 服務
 builder.Services.AddCors(options =>
@@ -54,6 +59,25 @@ builder.Services.AddControllers();
 
 // 註冊 SignalR 服務
 builder.Services.AddSignalR();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = "https://chat-web-app-backend-render.onrender.com", //後端 API
+
+            ValidateAudience = true,
+            ValidAudience = "https://chat-web-app-vercel.vercel.app", // 前端
+
+            ValidateLifetime = true, // 確保 Token 未過期
+            ValidateIssuerSigningKey = true, // 確保 Token 簽名正確
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("s3cr3t_k3y_!@#_$tr0ng_AND_R@nd0m")) // 密鑰
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 

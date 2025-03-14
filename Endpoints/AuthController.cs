@@ -103,11 +103,11 @@ namespace ChatAPI.Endpoints
 
             // 創建Token對象
             var token = new JwtSecurityToken(
-                issuer: "https://chat-web-app-vercel.vercel.app",         // 發布者
-                audience: "https://chat-web-app-vercel.vercel.app",       // 接收者
-                claims: claims,                   // 聲明
-                expires: DateTime.UtcNow.AddHours(1), // Token有效期
-                signingCredentials: credentials   // 簽名憑證
+                issuer: "https://chat-web-app-backend-render.onrender.com",  // 後端
+                audience: "https://chat-web-app-vercel.vercel.app",          // 前端
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(1),
+                signingCredentials: credentials
             );
 
             // 生成並返回JWT

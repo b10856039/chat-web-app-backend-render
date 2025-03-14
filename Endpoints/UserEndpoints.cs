@@ -5,6 +5,7 @@ using ChatAPI.DTO;
 using ChatAPI.Endpoints;
 using ChatAPI.Entities;
 using ChatAPI.Mapping;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static ChatAPI.Extensions.ExceptionMiddleware;
@@ -111,6 +112,7 @@ namespace ChatAPI.Controllers
         }
 
         // Update an existing user with PUT
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateUser(int id, [FromBody] UpdatePutUserDTO updateUser)
         {
@@ -136,6 +138,7 @@ namespace ChatAPI.Controllers
         }
 
         // Update an existing user with PATCH
+        [Authorize]
         [HttpPatch("{id}")]
         public async Task<IActionResult> PatchUser(int id, [FromBody] UpdatePatchUserDTO updateUser)
         {
@@ -214,6 +217,7 @@ namespace ChatAPI.Controllers
         }
 
         // Soft delete a user
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {

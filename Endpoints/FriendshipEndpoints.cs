@@ -3,6 +3,7 @@ using ChatAPI.Data;
 using ChatAPI.DTO.FriendShip;
 using ChatAPI.Entities;
 using ChatAPI.Mapping;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static ChatAPI.Extensions.ExceptionMiddleware;
@@ -72,7 +73,7 @@ namespace ChatAPI.Controllers
             return Ok( new ApiResponse<List<FriendShipNonDTO>>(nonFriends));
         }
 
-
+        [Authorize]
         [HttpPost("request")]
         public async Task<IActionResult> SendFriendShipRequest([FromBody] SendFriendShipRequestDTO friendShipRequester)
         {
@@ -141,7 +142,7 @@ namespace ChatAPI.Controllers
             }
         }
 
-
+        [Authorize]
         [HttpPost("respond")]
         public async Task<IActionResult> RespondToFriendRequest([FromBody] RespoendTpFriendRequestDTO toFriendRequester)
         {
@@ -198,6 +199,7 @@ namespace ChatAPI.Controllers
         }
 
 
+        [Authorize]
         [HttpPatch]
         public async Task<IActionResult> UpdateFriendStatus([FromBody] FriendStatusUpdateDTO update)
         {

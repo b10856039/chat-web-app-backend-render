@@ -3,6 +3,7 @@ using ChatAPI.Data;
 using ChatAPI.DTO.Message;
 using ChatAPI.Entities;
 using ChatAPI.Mapping;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,7 @@ namespace ChatAPI.Endpoints
             _dbContext = dbContext;
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetHistoryMessages([FromQuery] int userId, [FromQuery] int chatroomId, [FromQuery] bool latestOne)
         {

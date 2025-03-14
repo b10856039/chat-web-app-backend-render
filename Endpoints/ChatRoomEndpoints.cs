@@ -2,6 +2,7 @@ using ChatAPI.Data;
 using ChatAPI.DTO;
 using ChatAPI.Entities;
 using ChatAPI.Mapping;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static ChatAPI.Extensions.ExceptionMiddleware;
@@ -119,6 +120,7 @@ namespace ChatAPI.Controllers
 
 
         // Create a new chat room
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateChatRoom([FromBody] CreateChatroomDTO newChatroom)
         {
@@ -209,7 +211,7 @@ namespace ChatAPI.Controllers
     
 
 
-
+        [Authorize]
         [HttpPost("{id}/join")]
         public async Task<IActionResult> JoinChatRoom(int id, [FromBody] JoinChatroomDTO joinUser)
         {
@@ -262,6 +264,7 @@ namespace ChatAPI.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost("{Id}/kick")]
         public async Task<IActionResult> KickUserFromChatRoom(int Id, [FromBody] KickChatroomDTO kickRequest)
         {
@@ -314,6 +317,7 @@ namespace ChatAPI.Controllers
         }
 
         // Update a chat room using PATCH
+        [Authorize]
         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateChatRoom(int id, [FromBody] UpdatePatchChatroom updateRoom)
         {
@@ -372,6 +376,7 @@ namespace ChatAPI.Controllers
         }
 
         // Soft delete a chat room
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteChatRoom(int id, [FromQuery] int userId)
         {
@@ -411,7 +416,7 @@ namespace ChatAPI.Controllers
             }
         }
 
-
+        [Authorize]
         [HttpDelete("{id}/leave")]
         public async Task<IActionResult> LeaveChatRoom(int id, [FromBody] LeaveChatroomDTO leaveUser)
         {
