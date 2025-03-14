@@ -8,6 +8,7 @@ using ChatAPI.DTO;
 using ChatAPI.DTO.User;
 using ChatAPI.Entities;
 using ChatAPI.Mapping;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -86,6 +87,15 @@ namespace ChatAPI.Endpoints
             };
 
             return Ok( new ApiResponse<LoginResponseDTO>(token) );
+        }
+
+
+        //驗證token
+        [Authorize]
+        [HttpGet("validate-token")]
+        public IActionResult ValidateToken()
+        {
+            return Ok(new { valid = true });
         }
 
         public static string GenerateJwtToken(User user)
