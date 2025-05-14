@@ -80,8 +80,8 @@ public static class SignalRHandler
             _dbContext.Messages.Add(message);
             await _dbContext.SaveChangesAsync();
 
-            await Clients.Group($"ChatRoom_{chatRoomId}").SendAsync("ReceiveMessage", 
-                new MessageDTO
+
+            var messageDto =  new MessageDTO
                 (
                     message.Id,
                     message.Content,
@@ -92,7 +92,12 @@ public static class SignalRHandler
                     message.SentAt,
                     message.UpdateAt,
                     message.IsDeleted
-                ));
+            );
+
+            await Clients.Group($"ChatRoom_{chatRoomId}").SendAsync("ReceiveMessage", 
+                messageDto);
+
+            await Clients.Caller.SendAsync("ReceiveMessage", messageDto);
 
         }
 
