@@ -47,11 +47,10 @@ public static class SignalRHandler
             var chatRoom = await _dbContext.ChatRooms.FindAsync(chatRoomId);
             var datetime = DateTime.UtcNow;
 
-
             var userChatroom = await _dbContext.UserChatRooms.Where( ucr => ucr.UserId == userId && ucr.ChatRoomId == chatRoomId && ucr.IsBanned == false).FirstOrDefaultAsync();
 
             // 檢查是否找到對應的 User 和 ChatRoom
-            if (user == null || chatRoom == null)
+            if (user == null || chatRoom == null || chatRoom.IsDeleted)
             {
                 // 向當前客戶端發送錯誤消息
                 await Clients.Caller.SendAsync("ReceiveError", "User or ChatRoom not found");
