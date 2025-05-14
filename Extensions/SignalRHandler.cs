@@ -97,7 +97,6 @@ public static class SignalRHandler
             await Clients.Group($"ChatRoom_{chatRoomId}").SendAsync("ReceiveMessage", 
                 messageDto);
 
-            await Clients.Caller.SendAsync("ReceiveMessage", messageDto);
 
         }
 
