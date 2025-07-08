@@ -15,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 // 添加 CORS 服務
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowLocalhost", policy =>
+    options.AddPolicy("AllowFrontend", policy =>
     {
         policy.WithOrigins("http://localhost:5173",
                             "https://chat-web-app-vercel-ptik9j4yt-changshengs-projects.vercel.app",
@@ -86,10 +86,11 @@ app.UseRouting();  // 確保 SignalR 和控制器都能正確處理請求
 
 // 設置 CORS 策略
 // 在 UseRouting 之前設置 CORS 策略
-app.UseCors("AllowLocalhost");  
+app.UseCors("AllowFrontend");  
 
-// 設置 SignalR Hub 路由
-app.MapHub<ChatHub>("/api/chatHub");
+app.UseAuthentication();
+app.UseAuthorization();
+
 
 // 使用錯誤處理MiddleWare
 app.UseMiddleware<ExceptionMiddleware>(); // 註冊全域錯誤處理
@@ -97,8 +98,9 @@ app.UseMiddleware<ExceptionMiddleware>(); // 註冊全域錯誤處理
 // 使用 MVC 路由
 app.MapControllers();
 
-app.UseAuthentication();
-app.UseAuthorization();
+// 設置 SignalR Hub 路由
+app.MapHub<ChatHub>("/api/chatHub");
+
 
 // 如果有需要，可以在此執行資料庫遷移
 await app.MigrateDBAsync();
